@@ -2,6 +2,7 @@ import time
 import redis
 import json
 from datetime import datetime, timedelta
+from RedisClient import *
 
 from Ashare import *
 import baostock as bs
@@ -92,6 +93,13 @@ def filter_stocks():
             cur_close = df10.iloc[cur_index]['close']
             cur_high = df10.iloc[cur_index]['high']
             cur_low = df10.iloc[cur_index]['low']
+            # 获取最近五天的收盘价数据
+            five_day_closes = df10.iloc[cur_index - 4: cur_index + 1]['close']
+            # 计算五日均线价格
+            five_day_avg_price = five_day_closes.mean()
+            if not (cur_close > five_day_avg_price > cur_open):
+                # 非 上穿均线的情况，不考虑
+                continue
             # 计算上影线
             upper_shadow = cur_high - max(cur_open, cur_close)
             # 计算下影线
@@ -99,7 +107,7 @@ def filter_stocks():
             cur_volume = df10.iloc[cur_index]['volume']
             pre_volume = df10.iloc[cur_index - 1]['volume']
             min_low_10days = df10['low'].min()
-            if cur_close > cur_open and cur_low == min_low_10days and lower_shadow > upper_shadow * 2 and cur_volume > pre_volume:
+            if upper_shadow > 0 and lower_shadow > 0 and cur_close > cur_open and cur_low == min_low_10days and lower_shadow > upper_shadow * 2 and cur_volume > pre_volume:
                 # Calculate lower shadow ratio
                 lower_shadow_ratio = (min(cur_open, cur_close) - cur_low) / min(cur_open, cur_close)
                 # Append relevant information to look_stocks
@@ -110,6 +118,8 @@ def filter_stocks():
                     'open': cur_open,
                     'close': cur_close,
                     'low': cur_low,
+                    'high':cur_high,
+                    'volume':cur_volume,
                     'lower_shadow_ratio': lower_shadow_ratio
                 })
         time.sleep(1)
@@ -123,5 +133,9 @@ def filter_stocks():
 
 # stock = filter_stocks()
 # print(stock)
+# redis_client.set('filter_stock_info', json.dumps(stock))
 # stock_info = get_price_day_tx("sh601618")
 # print(stock_info)
+# stock = get_cache('filter_stock_info')
+# print(stock)
+# print(stock['code'])
