@@ -66,9 +66,9 @@ def query_hs300():
 
 
 def filter_stocks():
+    start_time = time.time()
     # ts.set_token('59ebf9b48a3e6b93219eb22ff2776bce3157ce53cf9fc7139860b3fb')
     # pro = ts.pro_api()
-
     look_stocks = []
     hs300_stocks = query_hs300()
     for index, row in hs300_stocks.iterrows():
@@ -130,6 +130,9 @@ def filter_stocks():
         return max_lower_shadow_stock
     else:
         print("No stocks found.")
+
+    end_time = time.time()
+    print("filter stock execution time:", end_time - start_time)
 
 # stock = filter_stocks()
 # print(stock)

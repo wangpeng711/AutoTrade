@@ -19,6 +19,15 @@ def job():
         if is_stop_loss(position, current) or is_up_shadow_sell(position, current):
             sell_position_all()
             print("卖出股票:", stock_code)
+            time.sleep(3)
+            print("卖出成功后重新选择股票")
+            # 筛选股票
+            buy_stock = filter_stocks()
+            print("筛选股票:", buy_stock)
+            # 交易股票
+            if buy_stock:
+                all_in_one(buy_stock)
+                print("梭哈股票：", buy_stock)
         print("-----持仓操作完成-----")
     else:
         # 未持仓
